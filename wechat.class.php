@@ -1132,7 +1132,12 @@ class Wechat
 	 * @return boolean
 	 */
 	protected function setCache($cachename,$value,$expired){
-		//TODO: set cache implementation
+		$myfile = fopen("caches/".$cachename.".txt", "w") or die("Unable to open file!");
+		$txt = $cachename."=".$value."||";
+		fwrite($myfile, $txt);
+		$txt = "expired=".$expired;
+		fwrite($myfile, $txt);
+		fclose($myfile);
 		return false;
 	}
 
@@ -1142,8 +1147,31 @@ class Wechat
 	 * @return mixed
 	 */
 	protected function getCache($cachename){
-		//TODO: get cache implementation
-		return false;
+		if(!file_exists("caches/".$cachename.".txt")){
+			$myfile = fopen("caches/".$cachename.".txt", "w") or die("Unable to open file!");
+			$txt = $cachename."=||";
+			fwrite($myfile, $txt);
+			$txt = "expired=";
+			fwrite($myfile, $txt);
+			fclose($myfile);
+			return false;
+		}
+		$time = filemtime("caches/".$cachename.".txt");
+		if($this->timediff($time,time()) < 7200){
+			$myfile = fopen("caches/".$cachename.".txt", "r") or die("Unable to open file!");
+			$data = fgets($myfile);
+			$array = explode("||",$data);
+			$valarray = explode("=",$array[0]);
+			fclose($myfile);
+			if($valarray[1] ==""){
+				return false;
+			}else{
+				return $valarray[1];
+			}
+			
+		}else{
+			return false;
+		}
 	}
 
 	/**
@@ -1152,8 +1180,32 @@ class Wechat
 	 * @return boolean
 	 */
 	protected function removeCache($cachename){
-		//TODO: remove cache implementation
+		$myfile = fopen("caches/".$cachename.".txt", "w") or die("Unable to open file!");
+		$txt = $cachename."=||";
+		fwrite($myfile, $txt);
+		$txt = "expired=";
+		fwrite($myfile, $txt);
+		fclose($myfile);
 		return false;
+	}
+	/**
+	 *缓存时间计算
+	 *$begin_time 开始时间
+	 *￥end_time 结束时间
+	 *
+	 */
+	 function timediff($begin_time,$end_time) { 
+		  if($begin_time < $end_time){ 
+			 $starttime = $begin_time; 
+			 $endtime = $end_time; 
+		  } 
+		  else{ 
+			 $starttime = $end_time; 
+			 $endtime = $begin_time; 
+		  } 
+		  $timediff = $endtime-$starttime; 
+		  $secs = $remain%60; 
+		  return $secs; 
 	}
 
 	/**
